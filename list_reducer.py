@@ -1,5 +1,6 @@
 import random
 from datetime import datetime as dt
+import matplotlib.pyplot as plt
 
 def avg_dates(date1, date2) -> str:
     d1 = dt.strptime(str(date1), '%Y-%m-%d')
@@ -19,6 +20,20 @@ def reduce_list(values, dates, length) -> tuple:
             reduced_values.append(int(temp_value))
             reduced_dates.append(temp_date)
         return reduce_list(reduced_values, reduced_dates, length)
+
+def draw_line(values, labels, new_values, new_labels):
+    plt.figure(figsize=(10, 8))
+
+    plt.subplot(3,1,1)
+    plt.plot(labels, values, 'r')
+    plt.title('Old List')
+    plt.xticks(rotation=45)
+
+    plt.subplot(3,1,3)    
+    plt.plot(new_labels, new_values)
+    plt.title('Reduced List')
+
+    plt.show()
 
 def test_fun():
     values = random.sample(range(1, 100), 20)
@@ -46,5 +61,7 @@ def test_fun():
 
     print("Reduced list: {} \n {}".format(new_values, new_dates))
     print("Reduced list length: {}".format(len(new_values)))
+
+    draw_line(values, dates, new_values, new_dates)
 
 test_fun()
