@@ -35,13 +35,17 @@ def draw_line(values, labels, new_values, new_labels):
     plt.subplot(3, 1, 3)
     plt.plot(new_labels, new_values)
     plt.title('Reduced List')
+    plt.xticks(rotation=45) 
 
     plt.show()
 
 
 def test_fun():
-    values = random.sample(range(1, 100), 20)
-    values.sort(reverse=False)
+    # values = random.sample(range(1, 100), 20)
+    # values.sort(reverse=False)
+    values = list()
+    for i in range(20):
+        values.append(random.randint(1,100))
 
     dates = ['2015-01-01', '2015-06-01',
              '2015-07-01', '2015-10-01',
@@ -54,7 +58,7 @@ def test_fun():
              '2018-01-01', '2018-02-01',
              '2018-04-01', '2018-06-01']
 
-    length = 5
+    length = 10
 
     new_values, new_dates = reduce_list(values, dates, length)
 
