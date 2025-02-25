@@ -1,76 +1,69 @@
 import random
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 import matplotlib.pyplot as plt
+from typing import List, Tuple
 
 
-def avg_dates(date1, date2) -> str:
-    d1 = dt.strptime(str(date1), '%Y-%m-%d')
-    d2 = dt.strptime(str(date2), '%Y-%m-%d')
-    avg_date = (d1.timestamp() + d2.timestamp()) / 2
+class DataReducer:
+    def __init__(self, values: List[int], dates: List[str], length: int):
+        self.values = values
+        self.dates = dates
+        self.length = length
 
-    return dt.fromtimestamp(int(avg_date)).strftime("%Y-%m-%d")
+    @staticmethod
+    def avg_dates(date1: str, date2: str) -> str:
+        """Calculate the average date between two dates."""
+        d1 = dt.strptime(date1, '%Y-%m-%d')
+        d2 = dt.strptime(date2, '%Y-%m-%d')
+        avg_date = (d1.timestamp() + d2.timestamp()) / 2
+        return dt.fromtimestamp(int(avg_date)).strftime('%Y-%m-%d')
 
-
-def reduce_list(values, dates, length) -> tuple:
-    if len(values) <= length:
+    def reduce_list(self) -> Tuple[List[int], List[str]]:
+        """Recursively reduce the list by averaging adjacent values and dates until the desired length is reached."""
+        values, dates = self.values, self.dates
+        while len(values) > self.length:
+            values, dates = [
+                (values[i] + values[i + 1]) // 2 for i in range(0, len(values) - 1, 2)
+            ], [
+                self.avg_dates(dates[i], dates[i + 1]) for i in range(0, len(dates) - 1, 2)
+            ]
         return values, dates
-    else:
-        reduced_values, reduced_dates = [], []
-        for x in range(0, len(values) - 1, 2):
-            temp_value = (values[x] + values[x + 1]) / 2
-            temp_date = avg_dates(dates[x], dates[x+1])
-            reduced_values.append(int(temp_value))
-            reduced_dates.append(temp_date)
-        return reduce_list(reduced_values, reduced_dates, length)
 
+    def draw_line(self, new_values: List[int], new_labels: List[str]) -> None:
+        """Plot the original and reduced data lists."""
+        plt.figure(figsize=(10, 8))
 
-def draw_line(values, labels, new_values, new_labels):
-    plt.figure(figsize=(10, 8))
+        plt.subplot(2, 1, 1)
+        plt.plot(self.dates, self.values, 'r', label='Original')
+        plt.title('Original List')
+        plt.xticks(rotation=45)
+        plt.legend()
 
-    plt.subplot(3, 1, 1)
-    plt.plot(labels, values, 'r')
-    plt.title('Old List')
-    plt.xticks(rotation=45)
+        plt.subplot(2, 1, 2)
+        plt.plot(new_labels, new_values, 'b', label='Reduced')
+        plt.title('Reduced List')
+        plt.xticks(rotation=45)
+        plt.legend()
 
-    plt.subplot(3, 1, 3)
-    plt.plot(new_labels, new_values)
-    plt.title('Reduced List')
-    plt.xticks(rotation=45) 
-
-    plt.show()
+        plt.tight_layout()
+        plt.show()
 
 
 def test_fun():
-    # values = random.sample(range(1, 100), 20)
-    # values.sort(reverse=False)
-    values = list()
-    for i in range(20):
-        values.append(random.randint(1,100))
+    """Generate random values and test the reduction function with visualization."""
+    values = [random.randint(1, 100) for _ in range(100)]
+    dates = [(dt.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(100)]
+    length = 25 # Desired length of the reduced list
 
-    dates = ['2015-01-01', '2015-06-01',
-             '2015-07-01', '2015-10-01',
-             '2015-12-01', '2016-02-01',
-             '2016-04-01', '2016-05-01',
-             '2016-08-01', '2016-10-01',
-             '2016-11-01', '2017-02-01',
-             '2017-03-01', '2017-06-01',
-             '2017-09-01', '2017-11-01',
-             '2018-01-01', '2018-02-01',
-             '2018-04-01', '2018-06-01']
+    reducer = DataReducer(values, dates, length)
+    new_values, new_dates = reducer.reduce_list()
 
-    length = 10
+    assert len(new_values) <= length, "Reduced list exceeds the desired length"
 
-    new_values, new_dates = reduce_list(values, dates, length)
+    print(f"Original list ({len(values)} items): {values}\n{dates}")
+    print(f"Reduced list ({len(new_values)} items): {new_values}\n{new_dates}")
 
-    assert(len(new_values) <= length)
-
-    print("Original list: {} \n {}".format(values, dates))
-    print("Original list length: {}".format(len(values)))
-
-    print("Reduced list: {} \n {}".format(new_values, new_dates))
-    print("Reduced list length: {}".format(len(new_values)))
-
-    draw_line(values, dates, new_values, new_dates)
+    reducer.draw_line(new_values, new_dates)
 
 
 test_fun()
